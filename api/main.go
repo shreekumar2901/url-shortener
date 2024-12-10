@@ -11,14 +11,7 @@ import (
 	"github.com/shreekumar2901/url-shortener/routes"
 )
 
-func hello(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"msg": "Hello",
-	})
-}
-
 func setupRoutes(app *fiber.App) {
-	app.Get("/api/v1/hello", hello)
 	app.Post("/api/v1/shorten/me", routes.ShortenUrl)
 	app.Get("/:url", routes.ResolveUrl)
 }
