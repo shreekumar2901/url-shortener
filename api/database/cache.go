@@ -2,17 +2,17 @@ package database
 
 import (
 	"context"
-	"os"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/shreekumar2901/url-shortener/config"
 )
 
 var Ctx = context.Background()
 
 func CreateDBClient(dbNo int) *redis.Client {
 	redisOptions := redis.Options{
-		Addr:     os.Getenv("DB_ADDR"),
-		Password: os.Getenv("DB_PASS"),
+		Addr:     config.Config("REDIS_ADDR"),
+		Password: config.Config("REDIS_PASS"),
 		DB:       dbNo,
 	}
 	rdb := redis.NewClient(&redisOptions)
