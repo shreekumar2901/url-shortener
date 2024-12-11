@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/shreekumar2901/url-shortener/config"
+	"github.com/shreekumar2901/url-shortener/database"
 	"github.com/shreekumar2901/url-shortener/routes"
 )
 
@@ -16,6 +17,7 @@ func setupRoutes(app *fiber.App) {
 }
 
 func main() {
+	database.Connect()
 	app := fiber.New()
 
 	app.Use(logger.New())
