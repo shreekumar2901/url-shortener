@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/shreekumar2901/url-shortener/routes"
@@ -26,8 +27,15 @@ func main() {
 	app := fiber.New()
 
 	app.Use(logger.New())
+	app.Use(cors.New())
 
 	setupRoutes(app)
+
+	app.Use(func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "API does not exist",
+		})
+	})
 
 	log.Fatal(app.Listen(os.Getenv("APP_PORT")))
 }
