@@ -53,7 +53,7 @@ func ShortenUrl(c *fiber.Ctx) error {
 			limit, _ := rdb.TTL(database.Ctx, c.IP()).Result()
 			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
 				"err":        "Rate limit exceeded",
-				"rate_limit": limit,
+				"rate_limit": limit / time.Nanosecond / time.Minute,
 			})
 
 		}
@@ -119,7 +119,7 @@ func ShortenUrl(c *fiber.Ctx) error {
 	resp.XRateRemaining, _ = strconv.Atoi(val)
 
 	ttl, _ := rdb.TTL(database.Ctx, c.IP()).Result()
-	resp.XRateLimitReset = ttl
+	resp.XRateLimitReset = ttl / time.Nanosecond / time.Minute
 
 	resp.CustomShort = os.Getenv("DOMAIN") + "/" + id
 
