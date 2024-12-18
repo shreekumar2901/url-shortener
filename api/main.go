@@ -11,11 +11,6 @@ import (
 	"github.com/shreekumar2901/url-shortener/routes"
 )
 
-func setupRoutes(app *fiber.App) {
-	app.Post("/api/v1/shorten", routes.ShortenUrl)
-	app.Get("/:url", routes.ResolveUrl)
-}
-
 func main() {
 	database.Connect()
 	app := fiber.New()
@@ -23,7 +18,7 @@ func main() {
 	app.Use(logger.New())
 	app.Use(cors.New())
 
-	setupRoutes(app)
+	routes.SetupRoutes(app)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

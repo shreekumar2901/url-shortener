@@ -17,7 +17,7 @@ type DbInstance struct {
 	DB *gorm.DB
 }
 
-var DB DbInstance
+var Db DbInstance
 
 func Connect() {
 	p := config.Config("POSTGRES_PORT")
@@ -45,5 +45,9 @@ func Connect() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	db.AutoMigrate(&domain.User{})
+
+	Db = DbInstance{
+		DB: db,
+	}
 
 }

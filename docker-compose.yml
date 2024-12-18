@@ -31,6 +31,7 @@ services:
       - "5432:5432"
     volumes:
       - .data/postgres:/var/lib/postgresql/data
+      - ./initdb/script.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_PASSWORD=s3cret
       - POSTGRES_USER=postgres

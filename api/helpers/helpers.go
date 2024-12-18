@@ -3,6 +3,8 @@ package helpers
 import (
 	"os"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func EnforeHTTP(url string) string {
@@ -26,4 +28,14 @@ func DetectDomainError(url string) bool {
 		return true
 	}
 	return false
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func VerifyPassword(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(password), []byte(hash))
+	return err == nil
 }

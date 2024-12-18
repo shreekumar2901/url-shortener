@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	gorm.Model
-	ID        uint      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        string    `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Username  string    `gorm:"unique;not null"`
 	Email     string    `gorm:"unique;not null"`
 	Password  string    `gorm:"not null"`       // Stored as a hash
