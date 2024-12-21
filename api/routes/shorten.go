@@ -10,7 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/shreekumar2901/url-shortener/database"
+	"github.com/shreekumar2901/url-shortener/dto"
 	"github.com/shreekumar2901/url-shortener/helpers"
+	"github.com/shreekumar2901/url-shortener/service"
 )
 
 type request struct {
@@ -28,6 +30,31 @@ type response struct {
 }
 
 func ShortenUrl(c *fiber.Ctx) error {
+	body := new(dto.UrlShortenRequestDTO)
+
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "can not parse the body",
+		})
+	}
+
+	// Check whether shortened URL exists or not
+	// TODO: Bind shortened url for particular user
+	service := service.UrlService{}
+
+	response, err := service.ShortenUrl(*body)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+
+}
+
+func ShortenUrlRedis(c *fiber.Ctx) error {
 
 	// acts like an object creation
 	body := new(request)

@@ -44,7 +44,7 @@ func Connect() {
 	log.Println("DB Connected")
 	db.Logger = logger.Default.LogMode(logger.Info)
 
-	db.AutoMigrate(&domain.User{})
+	db.AutoMigrate(&domain.User{}, &domain.Urls{})
 
 	Db = DbInstance{
 		DB: db,

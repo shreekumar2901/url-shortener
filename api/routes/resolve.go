@@ -4,9 +4,27 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/shreekumar2901/url-shortener/database"
+	"github.com/shreekumar2901/url-shortener/service"
 )
 
 func ResolveUrl(c *fiber.Ctx) error {
+	short := c.Params("short")
+
+	service := service.UrlService{}
+
+	url, err := service.ResolveUrl(short)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Redirect(url, 301)
+
+}
+
+func ResolveUrlRedis(c *fiber.Ctx) error {
 	url := c.Params("url")
 
 	rdb := database.CreateDBClient(0)

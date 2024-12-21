@@ -5,7 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/shreekumar2901/url-shortener/dto"
+	"github.com/shreekumar2901/url-shortener/helpers"
 )
 
 func RegisterUserValidator(dto *dto.UserRequestDTO) map[string][]string {
@@ -53,6 +55,21 @@ func RegisterUserValidator(dto *dto.UserRequestDTO) map[string][]string {
 
 	if !regexp.MustCompile(`[#,@,_,+,.,$,=]`).MatchString(password) {
 		errorMsgs["errors"] = append(errorMsgs["errors"], "Password must contain at least 1 special characters among #,@,_,+,.,$,=")
+	}
+
+	return errorMsgs
+}
+
+func ShortenUrlValidator(dto *dto.UrlShortenRequestDTO) map[string][]string {
+	errorMsgs := make(map[string][]string)
+	errorMsgs["errors"] = []string{}
+
+	if !govalidator.IsURL(dto.Url) {
+		errorMsgs["errors"] = append(errorMsgs["errors"], "Please provide a valid url")
+	}
+
+	if helpers.DetectDomainError(dto.Url) {
+		errorMsgs["errors"] = append(errorMsgs["errors"], "This domain is not possible!!")
 	}
 
 	return errorMsgs
