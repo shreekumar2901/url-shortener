@@ -15,18 +15,36 @@ import (
 	"github.com/shreekumar2901/url-shortener/service"
 )
 
-type request struct {
-	URL         string        `json:"url"`
-	CustomShort string        `json:"customShort"`
-	Expiry      time.Duration `json:"expiry"`
+func ListUrls(c *fiber.Ctx) error {
+	service := service.UrlService{}
+
+	response, err := service.ListUrls()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
-type response struct {
-	URL             string        `json:"url"`
-	CustomShort     string        `json:"customShort"`
-	Expiry          time.Duration `json:"expiry"`
-	XRateRemaining  int           `json:"rate_limit"`
-	XRateLimitReset time.Duration `json:"rate_limit_reset"`
+func DeleteShortByUrl(c *fiber.Ctx) error {
+	url := c.Query("url")
+
+	service := service.UrlService{}
+
+	url = helpers.EnforeHTTP(url)
+
+	if err := service.DeleteShortByUrl(url); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"msg": "record deleted successfully",
+	})
 }
 
 func ShortenUrl(c *fiber.Ctx) error {
@@ -52,6 +70,64 @@ func ShortenUrl(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(response)
 
+}
+
+func ResolveUrl(c *fiber.Ctx) error {
+	short := c.Params("short")
+
+	service := service.UrlService{}
+
+	url, err := service.ResolveUrl(short)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Redirect(url, 301)
+
+}
+
+func ResolveUrlRedis(c *fiber.Ctx) error {
+	url := c.Params("url")
+
+	rdb := database.CreateDBClient(0)
+	defer rdb.Close()
+
+	value, err := rdb.Get(database.Ctx, url).Result()
+
+	if err == redis.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "short not found in the database",
+		})
+	} else if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "cannot connect to DB",
+		})
+	}
+
+	rIncr := database.CreateDBClient(1)
+	defer rIncr.Close()
+
+	_ = rIncr.Incr(database.Ctx, "counter")
+
+	return c.Redirect(value, 301)
+
+}
+
+type request struct {
+	URL         string        `json:"url"`
+	CustomShort string        `json:"customShort"`
+	Expiry      time.Duration `json:"expiry"`
+}
+
+type response struct {
+	URL             string        `json:"url"`
+	CustomShort     string        `json:"customShort"`
+	Expiry          time.Duration `json:"expiry"`
+	XRateRemaining  int           `json:"rate_limit"`
+	XRateLimitReset time.Duration `json:"rate_limit_reset"`
 }
 
 func ShortenUrlRedis(c *fiber.Ctx) error {

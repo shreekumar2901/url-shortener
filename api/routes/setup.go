@@ -12,5 +12,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Url
 	app.Post("/api/v1/shorten", ShortenUrl)
+	app.Get("/api/v1/urls", ListUrls)
+	app.Delete("/api/v1/urls", DeleteShortByUrl)
 	app.Get("/:short", ResolveUrl)
 }

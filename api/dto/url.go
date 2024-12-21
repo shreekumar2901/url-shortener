@@ -9,3 +9,8 @@ type UrlShortenResponseDTO struct {
 	Url      string `json:"url"`
 	ShortUrl string `json:"short_url"`
 }
+
+type UrlListResponseDTO struct {
+	Url      string `json:"url"`
+	ShortUrl string `json:"short_url"`
+}

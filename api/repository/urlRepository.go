@@ -7,7 +7,43 @@ import (
 	"github.com/shreekumar2901/url-shortener/database"
 	"github.com/shreekumar2901/url-shortener/domain"
 	"github.com/shreekumar2901/url-shortener/dto"
+	"gorm.io/gorm"
 )
+
+func DeleteShortByUrl(url string) error {
+	db := database.Db.DB
+	var record domain.Urls
+
+	err := db.Where("url = ?", url).First(&record).Error
+
+	if err != nil {
+
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("record not found")
+		}
+
+		return err
+	}
+
+	if err := db.Delete(&record).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAll() ([]domain.Urls, error) {
+	db := database.Db.DB
+
+	var urls []domain.Urls
+
+	err := db.Find(&urls).Error
+
+	if err != nil {
+		return urls, errors.New("some error occured when getting urls")
+	}
+
+	return urls, nil
+}
 
 func GetUrlByShort(short string) (domain.Urls, error) {
 	db := database.Db.DB
@@ -45,7 +81,12 @@ func GetShortByUrl(url string) (string, error) {
 	err := db.Where("url = ?", url).First(&urlDomain).Error
 
 	if err != nil {
-		return "", errors.New("short does not exist for given url")
+
+		if err == gorm.ErrRecordNotFound {
+			return "", errors.New("short does not exist for given url")
+		}
+
+		return "", err
 	}
 
 	return urlDomain.Short, nil

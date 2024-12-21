@@ -22,32 +22,32 @@ func (s *UrlService) isShortExist(short string) bool {
 
 }
 
-func (s *UrlService) ShortenUrl(requestDTO dto.UrlShortenRequestDTO) (dto.UrlShortenResponseDTO, error) {
+func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO) (dto.UrlShortenResponseDTO, error) {
 
-	errorMsgs := validator.ShortenUrlValidator(&requestDTO)
+	errorMsgs := validator.ShortenUrlValidator(&shortenUrlRequestDTO)
 	var response dto.UrlShortenResponseDTO
 
 	if len(errorMsgs["errors"]) > 0 {
 		return response, errors.New(strings.Join(errorMsgs["errors"], ","))
 	}
 
-	isUrlExist := s.isShortExist(requestDTO.CustomShort)
+	isUrlExist := s.isShortExist(shortenUrlRequestDTO.CustomShort)
 
 	if isUrlExist {
 		return response, errors.New("can not user given custom short")
 	}
 
-	requestDTO.Url = helpers.EnforeHTTP(requestDTO.Url)
+	shortenUrlRequestDTO.Url = helpers.EnforeHTTP(shortenUrlRequestDTO.Url)
 
-	customShort := requestDTO.CustomShort
+	customShort := shortenUrlRequestDTO.CustomShort
 
 	if len(strings.TrimSpace(customShort)) == 0 {
 		customShort = uuid.NewString()[:6]
 	}
 
-	requestDTO.CustomShort = customShort
+	shortenUrlRequestDTO.CustomShort = customShort
 
-	url, err := repository.SaveShortenedUrl(requestDTO)
+	url, err := repository.SaveShortenedUrl(shortenUrlRequestDTO)
 
 	if err != nil {
 		return response, err
@@ -70,4 +70,33 @@ func (s *UrlService) ResolveUrl(short string) (string, error) {
 	}
 
 	return url.Url, nil
+}
+
+func (s *UrlService) ListUrls() ([]dto.UrlListResponseDTO, error) {
+	urls, err := repository.GetAll()
+
+	if err != nil {
+		return []dto.UrlListResponseDTO{}, err
+	}
+
+	var response []dto.UrlListResponseDTO
+
+	for _, url := range urls {
+		element := dto.UrlListResponseDTO{
+			Url:      url.Url,
+			ShortUrl: config.Config("DOMAIN") + "/" + url.Short,
+		}
+
+		response = append(response, element)
+	}
+
+	return response, nil
+}
+
+func (s *UrlService) DeleteShortByUrl(url string) error {
+	if err := repository.DeleteShortByUrl(url); err != nil {
+		return err
+	}
+
+	return nil
 }
