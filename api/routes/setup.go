@@ -4,15 +4,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App, jwt *fiber.Handler) {
 	// User
 	app.Post("/api/v1/user/register", CreateUser)
-	app.Get("/api/v1/user/:username", GetUserByUserName)
-	app.Delete("/api/v1/user/:username", DeleteUserByUserName)
+	app.Post("/api/v1/user/login", Login)
+	app.Get("/api/v1/user/:username", *jwt, GetUserByUserName)
+	app.Delete("/api/v1/user/:username", *jwt, DeleteUserByUserName)
 
 	// Url
-	app.Post("/api/v1/shorten", ShortenUrl)
-	app.Get("/api/v1/urls", ListUrls)
-	app.Delete("/api/v1/urls", DeleteShortByUrl)
-	app.Get("/:short", ResolveUrl)
+	app.Post("/api/v1/shorten", *jwt, ShortenUrl)
+	app.Get("/api/v1/urls", *jwt, ListUrls)
+	app.Delete("/api/v1/urls", *jwt, DeleteShortByUrl)
+	app.Get("/:short", *jwt, ResolveUrl)
 }

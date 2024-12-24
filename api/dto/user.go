@@ -11,3 +11,8 @@ type UserResponseDTO struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 }
+
+type UserLoginRequestDTO struct {
+	UsernameOrEmail string `json:"username_or_email"`
+	Password        string `json:"password"`
+}

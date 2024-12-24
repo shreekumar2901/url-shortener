@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/shreekumar2901/url-shortener/config"
 	"github.com/shreekumar2901/url-shortener/database"
+	"github.com/shreekumar2901/url-shortener/middlewares"
 	"github.com/shreekumar2901/url-shortener/routes"
 )
 
@@ -18,7 +19,9 @@ func main() {
 	app.Use(logger.New())
 	app.Use(cors.New())
 
-	routes.SetupRoutes(app)
+	jwt := middlewares.NewAuthMiddleware(config.Config("JWT_SECRET"))
+
+	routes.SetupRoutes(app, &jwt)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

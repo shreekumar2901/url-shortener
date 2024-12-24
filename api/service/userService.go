@@ -48,6 +48,29 @@ func (s *UserService) GetUserByUserName(username string) (dto.UserResponseDTO, e
 	return userResponseDTO, nil
 }
 
+func (s *UserService) FindByCredentials(UsernameOrEmail string, Password string) (dto.UserResponseDTO, error) {
+	var userResponseDTO dto.UserResponseDTO
+
+	hashedPassword, err := helpers.HashPassword(Password)
+
+	if err != nil {
+		return userResponseDTO, errors.New("some error occurred when processing password")
+	}
+
+	user, err := repository.FindByCredentials(UsernameOrEmail, hashedPassword)
+
+	if err != nil {
+		return userResponseDTO, err
+	}
+
+	userResponseDTO = dto.UserResponseDTO{
+		UserName: user.Username,
+		Role:     user.Role,
+	}
+
+	return userResponseDTO, nil
+}
+
 func (s *UserService) DeleteUserByUserName(username string) (string, error) {
 	err := repository.DeleteUserByUserName(username)
 
