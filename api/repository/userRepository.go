@@ -41,6 +41,17 @@ func GetUserByUserName(username string) (*domain.User, error) {
 	return &user, nil
 }
 
+func GetUserIdByUsername(username string) (string, error) {
+	db := database.Db.DB
+	var user domain.User
+
+	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		return "", err
+	}
+
+	return user.ID, nil
+}
+
 func FindByCredentials(usernameOfEmail string) (domain.User, error) {
 	db := database.Db.DB
 	var user domain.User

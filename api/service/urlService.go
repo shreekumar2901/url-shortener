@@ -14,15 +14,15 @@ import (
 
 type UrlService struct{}
 
-func (s *UrlService) isShortExist(short string) bool {
+func (s *UrlService) isShortExist(short string, userId string) bool {
 
-	_, err := repository.GetUrlByShort(short)
+	_, err := repository.GetUrlByShort(short, userId)
 
 	return err == nil
 
 }
 
-func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO) (dto.UrlShortenResponseDTO, error) {
+func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO, userId string) (dto.UrlShortenResponseDTO, error) {
 
 	errorMsgs := validator.ShortenUrlValidator(&shortenUrlRequestDTO)
 	var response dto.UrlShortenResponseDTO
@@ -31,7 +31,7 @@ func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO) (
 		return response, errors.New(strings.Join(errorMsgs["errors"], ","))
 	}
 
-	isUrlExist := s.isShortExist(shortenUrlRequestDTO.CustomShort)
+	isUrlExist := s.isShortExist(shortenUrlRequestDTO.CustomShort, userId)
 
 	if isUrlExist {
 		return response, errors.New("can not user given custom short")
@@ -47,7 +47,7 @@ func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO) (
 
 	shortenUrlRequestDTO.CustomShort = customShort
 
-	url, err := repository.SaveShortenedUrl(shortenUrlRequestDTO)
+	url, err := repository.SaveShortenedUrl(shortenUrlRequestDTO, userId)
 
 	if err != nil {
 		return response, err
@@ -62,8 +62,8 @@ func (s *UrlService) ShortenUrl(shortenUrlRequestDTO dto.UrlShortenRequestDTO) (
 
 }
 
-func (s *UrlService) ResolveUrl(short string) (string, error) {
-	url, err := repository.GetUrlByShort(short)
+func (s *UrlService) ResolveUrl(short string, userId string) (string, error) {
+	url, err := repository.GetUrlByShort(short, userId)
 
 	if err != nil {
 		return "", err
@@ -72,8 +72,8 @@ func (s *UrlService) ResolveUrl(short string) (string, error) {
 	return url.Url, nil
 }
 
-func (s *UrlService) ListUrls() ([]dto.UrlListResponseDTO, error) {
-	urls, err := repository.GetAll()
+func (s *UrlService) ListUrls(userId string) ([]dto.UrlListResponseDTO, error) {
+	urls, err := repository.GetAll(userId)
 
 	if err != nil {
 		return []dto.UrlListResponseDTO{}, err

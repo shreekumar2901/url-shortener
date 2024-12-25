@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/shreekumar2901/url-shortener/database"
@@ -16,9 +18,26 @@ import (
 )
 
 func ListUrls(c *fiber.Ctx) error {
+	// Get the corresponding user id
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+
+	userService := service.UserService{}
+
+	userId, err := userService.GetUserIdByUsername(username)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	fmt.Print(userId)
+
 	service := service.UrlService{}
 
-	response, err := service.ListUrls()
+	response, err := service.ListUrls(userId)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -56,11 +75,23 @@ func ShortenUrl(c *fiber.Ctx) error {
 		})
 	}
 
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+	userService := service.UserService{}
+	userId, err := userService.GetUserIdByUsername(username)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	// Check whether shortened URL exists or not
 	// TODO: Bind shortened url for particular user
 	service := service.UrlService{}
 
-	response, err := service.ShortenUrl(*body)
+	response, err := service.ShortenUrl(*body, userId)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -75,9 +106,15 @@ func ShortenUrl(c *fiber.Ctx) error {
 func ResolveUrl(c *fiber.Ctx) error {
 	short := c.Params("short")
 
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+	userService := service.UserService{}
+	userId, err := userService.GetUserIdByUsername(username)
+
 	service := service.UrlService{}
 
-	url, err := service.ResolveUrl(short)
+	url, err := service.ResolveUrl(short, userId)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

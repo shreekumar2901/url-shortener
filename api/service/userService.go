@@ -48,6 +48,16 @@ func (s *UserService) GetUserByUserName(username string) (dto.UserResponseDTO, e
 	return userResponseDTO, nil
 }
 
+func (s *UserService) GetUserIdByUsername(username string) (string, error) {
+	id, err := repository.GetUserIdByUsername(username)
+
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}
+
 func (s *UserService) FindByCredentials(UsernameOrEmail string, Password string) (dto.UserResponseDTO, error) {
 	var userResponseDTO dto.UserResponseDTO
 
@@ -62,6 +72,7 @@ func (s *UserService) FindByCredentials(UsernameOrEmail string, Password string)
 	}
 
 	userResponseDTO = dto.UserResponseDTO{
+		Email:    user.Email,
 		UserName: user.Username,
 		Role:     user.Role,
 	}

@@ -31,25 +31,23 @@ func DeleteShortByUrl(url string) error {
 	return nil
 }
 
-func GetAll() ([]domain.Urls, error) {
+func GetAll(userId string) ([]domain.Urls, error) {
 	db := database.Db.DB
 
 	var urls []domain.Urls
 
-	err := db.Find(&urls).Error
-
-	if err != nil {
+	if err := db.Where("user_id = ?", userId).Find(&urls).Error; err != nil {
 		return urls, errors.New("some error occured when getting urls")
 	}
 
 	return urls, nil
 }
 
-func GetUrlByShort(short string) (domain.Urls, error) {
+func GetUrlByShort(short string, userId string) (domain.Urls, error) {
 	db := database.Db.DB
 	var url domain.Urls
 
-	err := db.Where("short = ?", short).First(&url).Error
+	err := db.Where("short = ? AND user_id = ?", short, userId).First(&url).Error
 
 	if err != nil {
 		return domain.Urls{}, errors.New("url for this short does not exist")
@@ -58,12 +56,13 @@ func GetUrlByShort(short string) (domain.Urls, error) {
 	return url, nil
 }
 
-func SaveShortenedUrl(urlDTO dto.UrlShortenRequestDTO) (domain.Urls, error) {
+func SaveShortenedUrl(urlDTO dto.UrlShortenRequestDTO, userId string) (domain.Urls, error) {
 	db := database.Db.DB
 	url := domain.Urls{
 		Short:  urlDTO.CustomShort,
 		Url:    urlDTO.Url,
 		Expiry: time.Now().Local().Add(48 * time.Hour), // Setting expity as 48 hours
+		UserID: userId,
 	}
 
 	if err := db.Save(&url).Error; err != nil {
