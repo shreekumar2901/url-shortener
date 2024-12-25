@@ -93,8 +93,8 @@ func (s *UrlService) ListUrls(userId string) ([]dto.UrlListResponseDTO, error) {
 	return response, nil
 }
 
-func (s *UrlService) DeleteShortByUrl(url string) error {
-	if err := repository.DeleteShortByUrl(url); err != nil {
+func (s *UrlService) DeleteShortByUrl(url string, userId string) error {
+	if err := repository.DeleteShortByUrl(url, userId); err != nil {
 		return err
 	}
 

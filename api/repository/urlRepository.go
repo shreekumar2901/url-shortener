@@ -10,11 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func DeleteShortByUrl(url string) error {
+func DeleteShortByUrl(url string, userId string) error {
 	db := database.Db.DB
 	var record domain.Urls
 
-	err := db.Where("url = ?", url).First(&record).Error
+	err := db.Where("url = ? AND user_id = ?", url, userId).First(&record).Error
 
 	if err != nil {
 
@@ -72,12 +72,12 @@ func SaveShortenedUrl(urlDTO dto.UrlShortenRequestDTO, userId string) (domain.Ur
 	return url, nil
 }
 
-func GetShortByUrl(url string) (string, error) {
+func GetShortByUrl(url string, userId string) (string, error) {
 	db := database.Db.DB
 
 	var urlDomain domain.Urls
 
-	err := db.Where("url = ?", url).First(&urlDomain).Error
+	err := db.Where("url = ? AND user_id = ?", url, userId).First(&urlDomain).Error
 
 	if err != nil {
 

@@ -49,13 +49,25 @@ func ListUrls(c *fiber.Ctx) error {
 }
 
 func DeleteShortByUrl(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+	userService := service.UserService{}
+	userId, err := userService.GetUserIdByUsername(username)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	url := c.Query("url")
 
 	service := service.UrlService{}
 
 	url = helpers.EnforeHTTP(url)
 
-	if err := service.DeleteShortByUrl(url); err != nil {
+	if err := service.DeleteShortByUrl(url, userId); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
