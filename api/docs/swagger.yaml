@@ -1,0 +1,102 @@
+definitions:
+  dto.ErrorResponse:
+    properties:
+      errorMsgs:
+        items:
+          type: string
+        type: array
+      statusCode:
+        type: integer
+    type: object
+  dto.SuccessResponse:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  dto.UserLoginRequestDTO:
+    properties:
+      password:
+        type: string
+      username_or_email:
+        type: string
+    type: object
+  dto.UserRequestDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: This is a REST API for a URL shortener service.
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: User logs in and a token is returned
+      parameters:
+      - description: Login details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: User Login
+      tags:
+      - User
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a user account with a username, email, and password
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - User
+swagger: "2.0"

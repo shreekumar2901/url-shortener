@@ -11,36 +11,62 @@ import (
 	"github.com/shreekumar2901/url-shortener/validator"
 )
 
+// @Summary Create a new user
+// @Description Creates a user account with a username, email, and password
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user body dto.UserRequestDTO true "User details"
+// @Success 201 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/user/register [post]
 func CreateUser(c *fiber.Ctx) error {
 	userDTO := new(dto.UserRequestDTO)
 
 	if err := c.BodyParser(&userDTO); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Could not parse the request body",
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{"could not parse the request body"},
+			StatusCode: fiber.StatusBadRequest,
 		})
 	}
 
 	errorMsgs := validator.RegisterUserValidator(userDTO)
 
 	if len(errorMsgs["errors"]) > 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(errorMsgs)
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ErrorResponse{
+			ErrorMsgs:  errorMsgs["errors"],
+			StatusCode: fiber.StatusBadRequest,
+		})
 	}
 
 	service := service.UserService{}
 	msg, err := service.CreateUser(userDTO)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Some error occured when  creating user",
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{"Some error occured when  creating user"},
+			StatusCode: fiber.StatusInternalServerError,
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"msg": msg,
+	return c.Status(fiber.StatusCreated).JSON(dto.SuccessResponse{
+		Message:    msg,
+		StatusCode: fiber.StatusCreated,
 	})
 
 }
 
+// @Summary User Login
+// @Description User logs in and a token is returned
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user body dto.UserLoginRequestDTO true "Login details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/user/login [post]
 func Login(c *fiber.Ctx) error {
 	loginRquestDTO := new(dto.UserLoginRequestDTO)
 
@@ -55,8 +81,9 @@ func Login(c *fiber.Ctx) error {
 	user, err := userService.FindByCredentials(loginRquestDTO.UsernameOrEmail, loginRquestDTO.Password)
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "unauthorized request",
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{"unauthorized request"},
+			StatusCode: fiber.StatusUnauthorized,
 		})
 	}
 
@@ -74,8 +101,9 @@ func Login(c *fiber.Ctx) error {
 
 	t, err := token.SignedString([]byte(config.Config("JWT_SECRET")))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{err.Error()},
+			StatusCode: fiber.StatusUnauthorized,
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
