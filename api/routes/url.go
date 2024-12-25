@@ -124,6 +124,12 @@ func ResolveUrl(c *fiber.Ctx) error {
 	userService := service.UserService{}
 	userId, err := userService.GetUserIdByUsername(username)
 
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	service := service.UrlService{}
 
 	url, err := service.ResolveUrl(short, userId)
