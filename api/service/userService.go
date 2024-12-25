@@ -51,16 +51,14 @@ func (s *UserService) GetUserByUserName(username string) (dto.UserResponseDTO, e
 func (s *UserService) FindByCredentials(UsernameOrEmail string, Password string) (dto.UserResponseDTO, error) {
 	var userResponseDTO dto.UserResponseDTO
 
-	hashedPassword, err := helpers.HashPassword(Password)
-
-	if err != nil {
-		return userResponseDTO, errors.New("some error occurred when processing password")
-	}
-
-	user, err := repository.FindByCredentials(UsernameOrEmail, hashedPassword)
+	user, err := repository.FindByCredentials(UsernameOrEmail)
 
 	if err != nil {
 		return userResponseDTO, err
+	}
+
+	if !helpers.VerifyPassword(user.Password, Password) {
+		return userResponseDTO, errors.New("unauthorized request")
 	}
 
 	userResponseDTO = dto.UserResponseDTO{

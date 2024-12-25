@@ -41,11 +41,11 @@ func GetUserByUserName(username string) (*domain.User, error) {
 	return &user, nil
 }
 
-func FindByCredentials(usernameOfEmail string, password string) (domain.User, error) {
+func FindByCredentials(usernameOfEmail string) (domain.User, error) {
 	db := database.Db.DB
 	var user domain.User
 
-	if err := db.Where("username = ?", usernameOfEmail).Or("email = ?", usernameOfEmail).Where("password = ?", password).First(&user).Error; err != nil {
+	if err := db.Where("username = ? OR email = ?", usernameOfEmail, usernameOfEmail).First(&user).Error; err != nil {
 		return user, errors.New("user not found")
 	}
 
