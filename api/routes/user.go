@@ -111,6 +111,16 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Get user details by username
+// @Description Getting user details from username
+// @Tags User
+// @Produce json
+// @Param Authorization header string true "Bearer Token in the format 'Bearer <token>'"
+// @Param username path string true "Username of the user"
+// @Success 200 {object} dto.UserResponseDTO
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/user/{username} [get]
 func GetUserByUserName(c *fiber.Ctx) error {
 	username := c.Params("username")
 
@@ -119,14 +129,24 @@ func GetUserByUserName(c *fiber.Ctx) error {
 	response, err := service.GetUserByUserName(username)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{err.Error()},
+			StatusCode: fiber.StatusBadRequest,
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
+// @Summary Delete user by username
+// @Description Delete user from username
+// @Tags User
+// @Produce json
+// @Param Authorization header string true "Bearer Token in the format 'Bearer <token>'"
+// @Param username path string true "Username of the user"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Router /api/v1/user/{username} [delete]
 func DeleteUserByUserName(c *fiber.Ctx) error {
 	username := c.Params("username")
 
@@ -135,8 +155,9 @@ func DeleteUserByUserName(c *fiber.Ctx) error {
 	msg, err := service.DeleteUserByUserName(username)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ErrorResponse{
+			ErrorMsgs:  []string{err.Error()},
+			StatusCode: fiber.StatusBadRequest,
 		})
 	}
 

@@ -31,6 +31,15 @@ definitions:
       username:
         type: string
     type: object
+  dto.UserResponseDTO:
+    properties:
+      email:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:3000
 info:
   contact: {}
@@ -38,6 +47,67 @@ info:
   title: URL Shortener API
   version: "1.0"
 paths:
+  /api/v1/user/{username}:
+    delete:
+      description: Delete user from username
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Username of the user
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete user by username
+      tags:
+      - User
+    get:
+      description: Getting user details from username
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Username of the user
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user details by username
+      tags:
+      - User
   /api/v1/user/login:
     post:
       consumes:
