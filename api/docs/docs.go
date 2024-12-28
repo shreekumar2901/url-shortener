@@ -15,6 +15,150 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/urls": {
+            "get": {
+                "description": "List the all urls and their short for the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Url"
+                ],
+                "summary": "List Urls ans shorts for the User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token in the format 'Bearer \u003ctoken\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/dto.UrlListResponseDTO"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the short for given url",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Url"
+                ],
+                "summary": "Delete Short By Url",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token in the format 'Bearer \u003ctoken\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The URL for which the short URL should be deleted",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/urls/shorten": {
+            "post": {
+                "description": "Creates a custom short for given URL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Url"
+                ],
+                "summary": "Create Short for a URL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token in the format 'Bearer \u003ctoken\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body for creating a short URL",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UrlShortenRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UrlShortenResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/login": {
             "post": {
                 "description": "User logs in and a token is returned",
@@ -197,6 +341,54 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/{short}": {
+            "get": {
+                "description": "Resolves a short URL to its original URL and redirects the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Url"
+                ],
+                "summary": "Resolve Short URL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token in the format 'Bearer \u003ctoken\u003e'",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Shortened URL identifier",
+                        "name": "short",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "301": {
+                        "description": "Redirects to the original URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -222,6 +414,39 @@ const docTemplate = `{
                 },
                 "statusCode": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.UrlListResponseDTO": {
+            "type": "object",
+            "properties": {
+                "short_url": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UrlShortenRequestDTO": {
+            "type": "object",
+            "properties": {
+                "custom_short": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UrlShortenResponseDTO": {
+            "type": "object",
+            "properties": {
+                "short_url": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

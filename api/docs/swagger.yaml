@@ -15,6 +15,27 @@ definitions:
       statusCode:
         type: integer
     type: object
+  dto.UrlListResponseDTO:
+    properties:
+      short_url:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.UrlShortenRequestDTO:
+    properties:
+      custom_short:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.UrlShortenResponseDTO:
+    properties:
+      short_url:
+        type: string
+      url:
+        type: string
+    type: object
   dto.UserLoginRequestDTO:
     properties:
       password:
@@ -47,6 +68,134 @@ info:
   title: URL Shortener API
   version: "1.0"
 paths:
+  /{short}:
+    get:
+      description: Resolves a short URL to its original URL and redirects the user
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Shortened URL identifier
+        in: path
+        name: short
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "301":
+          description: Redirects to the original URL
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Resolve Short URL
+      tags:
+      - Url
+  /api/v1/urls:
+    delete:
+      description: Delete the short for given url
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: The URL for which the short URL should be deleted
+        in: query
+        name: url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete Short By Url
+      tags:
+      - Url
+    get:
+      description: List the all urls and their short for the user
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/dto.UrlListResponseDTO'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List Urls ans shorts for the User
+      tags:
+      - Url
+  /api/v1/urls/shorten:
+    post:
+      description: Creates a custom short for given URL
+      parameters:
+      - description: Bearer Token in the format 'Bearer <token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request body for creating a short URL
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UrlShortenRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UrlShortenResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create Short for a URL
+      tags:
+      - Url
   /api/v1/user/{username}:
     delete:
       description: Delete user from username
